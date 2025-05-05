@@ -263,206 +263,213 @@
 
         <div class="post-content">
             <p>​</p>
-<h2 id="0-完整流程">0. 完整流程</h2>
+<h2 id="完整流程">0. 完整流程</h2>
 <p>该部分希望以全局的视角，简要而完整的展示（硬间隔）SVM算法的整体流程，以便于读者对该算法形成一个完整的视图。对于各部分的细节推导在后续对应模块中。</p>
-<ol>
-<li>
-<p>根据SVM目标：找到一个分类超平面$G(x)=wx+b=0$，能够正确分离所有样本（约束条件），同时使得分类间隔最大化（优化目标），得到基本优化问题：<br>
-$$<br>
-\underset{w,b}{min} ~ \frac{1}{2}w^Tw \<br>
-s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~ i=1,2,…,l<br>
-$$</p>
-</li>
-<li>
-<p>拉格朗日对偶问题</p>
-<p>对于1.得到的约束极值问题，使用拉格朗日函数转化为无约束极值问题：<br>
-$$<br>
-\underset{w,b}{min} ~ \underset{λ}{max} ~ L(w,b,λ) = \frac{1}{2}w^Tw +  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \<br>
-s.t. ~ \lambda_i \ge 0<br>
-$$<br>
-对于以上无约束极值问题，我们求解其对偶问题：<br>
-$$<br>
-\underset{λ}{max} ~ \underset{w,b}{min} ~ L(w,b,λ) = \frac{1}{2}w^Tw +  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \<br>
-s.t. ~ \lambda_i \ge 0<br>
-$$<br>
-对于$\underset{w,b}{min} ~ L(w,b,λ)$, 令$L$对$w,b$偏导数等于$0$, 得到如下二次优化问题:</p>
-<p>$$<br>
-\underset{λ}{\max}~\sum_{i=1}^{l} λ_i - \frac{1}{2}\sum_{i=1}^{l}\sum_{j=1}^{l} λ_i λ_j y^{(i)} y^{(j)} (x^{(i)} \cdot x^{(j)}) \<br>
-\text{s.t.} \quad \lambda_i \ge 0 \<br>
-\qquad \qquad \sum_{i=1}^{l} λ_iy^{(i)} = 0<br>
-$$</p>
-</li>
-<li>
-<p>SMO算法求解</p>
-<p>使用SMO算法求解以上二次优化问题,得到$λ_i$</p>
-<p>根据对偶问题的互补松弛性<br>
-$$<br>
-λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) = 0<br>
-$$<br>
-根据等式(1)可以计算得到$w$.</p>
-<p>对于$λ_i \ne 0$的样本, 有$(1 - y^{(i)}(w^Tx^{(i)}+b)) = 0$, 即对应样本为支持向量.</p>
+<ol type="1">
+<li><p>根据SVM目标：找到一个分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>，能够正确分离所有样本（约束条件），同时使得分类间隔最大化（优化目标），得到基本优化问题：
+<span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span></p></li>
+<li><p>拉格朗日对偶问题</p>
+<p>对于1.得到的约束极值问题，使用拉格朗日函数转化为无约束极值问题：
+<span class="math display">$$
+\underset{w,b}{min} ~ \underset{λ}{max} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于以上无约束极值问题，我们求解其对偶问题： <span
+class="math display">$$
+\underset{λ}{max} ~ \underset{w,b}{min} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于<span class="math inline">$\underset{w,b}{min} ~
+L(w,b,λ)$</span>, 令<span class="math inline"><em>L</em></span>对<span
+class="math inline"><em>w</em>, <em>b</em></span>偏导数等于<span
+class="math inline">0</span>, 得到如下二次优化问题:</p>
+<p><span class="math display">$$
+\underset{λ}{\max}~\sum_{i=1}^{l} λ_i -
+\frac{1}{2}\sum_{i=1}^{l}\sum_{j=1}^{l} λ_i λ_j y^{(i)} y^{(j)} (x^{(i)}
+\cdot x^{(j)}) \\
+\text{s.t.} \quad \lambda_i \ge 0 \\
+\qquad \qquad \sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p></li>
+<li><p>SMO算法求解</p>
+<p>使用SMO算法求解以上二次优化问题,得到<span
+class="math inline"><em>λ</em><sub><em>i</em></sub></span></p>
+<p>根据对偶问题的互补松弛性 <span
+class="math display"><em>λ</em><sub><em>i</em></sub>(1 − <em>y</em><sup>(<em>i</em>)</sup>(<em>w</em><sup><em>T</em></sup><em>x</em><sup>(<em>i</em>)</sup> + <em>b</em>)) = 0</span>
+根据等式(1)可以计算得到<span class="math inline"><em>w</em></span>.</p>
+<p>对于<span
+class="math inline"><em>λ</em><sub><em>i</em></sub> ≠ 0</span>的样本,
+有<span
+class="math inline">(1 − <em>y</em><sup>(<em>i</em>)</sup>(<em>w</em><sup><em>T</em></sup><em>x</em><sup>(<em>i</em>)</sup> + <em>b</em>)) = 0</span>,
+即对应样本为支持向量.</p>
 <p>带入一个支撑向量样本,即可得到b（减少误差可以带入所有支撑向量计算平均b）。</p>
-<p>至此，分类超平面$G(x)=W^Tx+b=0$已求出</p>
-</li>
+<p>至此，分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>W</em><sup><em>T</em></sup><em>x</em> + <em>b</em> = 0</span>已求出</p></li>
 </ol>
-<h2 id="1-SVM初始优化问题">1. SVM初始优化问题</h2>
-<p>SVM目标：找到一个分类超平面$G(x)=wx+b=0$使得支撑向量$x_s$到决策边界的距离$r_i=\frac{|G(x_s)|}{||w||}$最大化，即最大化分类间距d=2r，得到初始优化问题：<br>
-$$<br>
-\underset{w,b}{max} ~ d=2\frac{|G(x_s)|}{||w||} \<br>
-$$</p>
-<p>由于超平面$G(x)=wx+b=0$可以等比例放缩w, b而不改变超平面本身，即$G(x)=wx+b=0$等价于$G(x)=kwx+kb=0$，因此对于上述问题，可以通过固定分母$||w||$最大化分子$|G(x_s)|$，也可以固定分子$|G(x_s)|$最小化分母$||w||$。这里选择后者，令：<br>
-$$<br>
-|G(x_s)|=1 \<br>
-$$<br>
-由于$x_s$为支撑向量，因此对于任意样本$x^{(i)}$，有<br>
-$$<br>
-|G(x^{(i)})|\ge1 \<br>
-$$<br>
-为去除绝对值，分为以下两种情况讨论：<br>
-$$<br>
-\left{<br>
-\begin{matrix}<br>
-G(x^{(i)}) \ge 1 &amp;&amp; y^{(i)}=1\<br>
-G(x^{(i)}) \le -1 &amp;&amp; y^{(i)}=-1\<br>
-\end{matrix}<br>
-\right .<br>
-$$<br>
-（对于二分类问题，对于正样本记$y^{(i)}=1$，负样本记$y^{(i)}=-1$）</p>
-<p>等价于：<br>
-$$<br>
-y^{(i)}G(x_i) = y^{(i)}(w^Tx^{(i)}+b) \ge 1 ~~~~~ i=1,2,…,l \<br>
-$$<br>
-即：<br>
-$$<br>
-1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 \qquad i=1,2,…,l \<br>
-$$</p>
-<p>此时优化目标转化为$min ~ ||w||$，为便于后续推导，变换为优化$min ~ \frac{1}{2}||w||^2 = \frac{1}{2}w^Tw $</p>
-<p>完整优化问题变为一个约束极值问题：<br>
-$$<br>
-\underset{w,b}{min} ~ \frac{1}{2}w^Tw \<br>
-s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~ i=1,2,…,l<br>
-$$<br>
-（以上问题即为0.1节中的基本优化问题）</p>
-<h2 id="2-拉格朗日对偶问题">2. 拉格朗日对偶问题</h2>
-<h3 id="2-1-拉格朗日对偶">2.1 拉格朗日对偶</h3>
-<p>原始约束极值问题：<br>
-$$<br>
-\underset{x}{min} ~ f_0(x) \<br>
-s.t. ~ f_i(x) \le 0, ~ i=1,2,…,m \</p>
-<pre><code class="language-h_j(x)">$$
-其拉格朗日函数定义为:
-$$
-L(x,λ,ν) = f_0(x) + \sum_&#123;i=1&#125;^&#123;m&#125;λ_i f_i(x) + \sum_&#123;j=1&#125;^&#123;p&#125;ν_j h_j(x) ~~~~~~ λ_i \ge 0
-$$
-由于$λ_i \ge 0 , ~f_i(x) \le 0 ,~ h_j(x) = 0  $,所以 $L(x,λ,ν) = f_0(x) + \sum_&#123;i=1&#125;^&#123;m&#125;λ_i f_i(x) \le f_0(x)$
-
-原始问题等价于:
-$$
-\underset&#123;x&#125;&#123;min&#125; ~ \underset&#123;λ, ν&#125;&#123;max&#125; ~ L(x,λ,ν) \\
+<h2 id="svm初始优化问题">1. SVM初始优化问题</h2>
+<p>SVM目标：找到一个分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>使得支撑向量<span
+class="math inline"><em>x</em><sub><em>s</em></sub></span>到决策边界的距离<span
+class="math inline">$r_i=\frac{|G(x_s)|}{||w||}$</span>最大化，即最大化分类间距d=2r，得到初始优化问题：
+<span class="math display">$$
+\underset{w,b}{max} ~ d=2\frac{|G(x_s)|}{||w||} \\
+$$</span></p>
+<p>由于超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>可以等比例放缩w,
+b而不改变超平面本身，即<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>等价于<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>k</em><em>w</em><em>x</em> + <em>k</em><em>b</em> = 0</span>，因此对于上述问题，可以通过固定分母<span
+class="math inline">||<em>w</em>||</span>最大化分子<span
+class="math inline">|<em>G</em>(<em>x</em><sub><em>s</em></sub>)|</span>，也可以固定分子<span
+class="math inline">|<em>G</em>(<em>x</em><sub><em>s</em></sub>)|</span>最小化分母<span
+class="math inline">||<em>w</em>||</span>。这里选择后者，令： <span
+class="math display">$$
+|G(x_s)|=1 \\
+$$</span> 由于<span
+class="math inline"><em>x</em><sub><em>s</em></sub></span>为支撑向量，因此对于任意样本<span
+class="math inline"><em>x</em><sup>(<em>i</em>)</sup></span>，有 <span
+class="math display">$$
+|G(x^{(i)})|\ge1 \\
+$$</span> 为去除绝对值，分为以下两种情况讨论： <span
+class="math display">$$
+\left\{
+\begin{matrix}
+G(x^{(i)}) \ge 1 &amp;&amp; y^{(i)}=1\\
+G(x^{(i)}) \le -1 &amp;&amp; y^{(i)}=-1\\
+\end{matrix}
+\right .
+$$</span> （对于二分类问题，对于正样本记<span
+class="math inline"><em>y</em><sup>(<em>i</em>)</sup> = 1</span>，负样本记<span
+class="math inline"><em>y</em><sup>(<em>i</em>)</sup> = −1</span>）</p>
+<p>等价于： <span class="math display">$$
+y^{(i)}G(x_i) = y^{(i)}(w^Tx^{(i)}+b) \ge 1 ~~~~~ i=1,2,...,l \\
+$$</span> 即： <span class="math display">$$
+1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 \qquad i=1,2,...,l \\
+$$</span></p>
+<p>此时优化目标转化为<span
+class="math inline"><em>m</em><em>i</em><em>n</em> ||<em>w</em>||</span>，为便于后续推导，变换为优化$min
+~ ||w||^2 = w^Tw $</p>
+<p>完整优化问题变为一个约束极值问题： <span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span> （以上问题即为0.1节中的基本优化问题）</p>
+<h2 id="拉格朗日对偶问题">2. 拉格朗日对偶问题</h2>
+<h3 id="拉格朗日对偶">2.1 拉格朗日对偶</h3>
+<p>原始约束极值问题： <span class="math display">$$
+\underset{x}{min} ~ f_0(x) \\
+s.t. ~ f_i(x) \le 0, ~ i=1,2,...,m \\
+~~~~~~~ h_j(x) = 0 ,~  j = 1,2,...,p
+$$</span> 其拉格朗日函数定义为: <span class="math display">$$
+L(x,λ,ν) = f_0(x) + \sum_{i=1}^{m}λ_i f_i(x) + \sum_{j=1}^{p}ν_j h_j(x)
+~~~~~~ λ_i \ge 0
+$$</span> 由于$λ_i , ~f_i(x) ,~ h_j(x) = 0 $,所以 <span
+class="math inline">$L(x,λ,ν) = f_0(x) + \sum_{i=1}^{m}λ_i f_i(x) \le
+f_0(x)$</span></p>
+<p>原始问题等价于: <span class="math display">$$
+\underset{x}{min} ~ \underset{λ, ν}{max} ~ L(x,λ,ν) \\
 s.t. ~ λ_i \ge 0
-$$
-观察拉格朗日函数$L(x,λ,ν)$，可以看到，对于固定的$x^*$，有：
-$$
-L(x^*,λ,ν) = f_0(x^*) + \sum_&#123;i=1&#125;^&#123;m&#125;λ_i f_i(x^*) + \sum_&#123;j=1&#125;^&#123;p&#125;ν_j h_j(x^*)
-$$
- 是关于$λ, ν$的仿射函数(仿射函数是由变量一阶多项式构成的函数，即形如$f(x)=wx+b$的函数，既是凸函数又是凹函数)。
-
-令：
-$$
-g(λ,ν) = \min_&#123;x&#125; L(x,λ,ν) \\
-$$
-$g(λ,ν)$是关于λ, ν的凹函数。
-
-这里可以用函数的部分应用来理解。对于每一个$x_i$，对应一个$g_i(λ,ν) = L(x_i,λ,ν)$. 总计l 个（样本数量）仿射函数，取最小值。
-
-![pic](/image/image-20250504194439190.png)
-
-对偶问题：
-$$
-\underset&#123;λ, ν&#125;&#123;max&#125; ~ g(λ,ν) = \underset&#123;λ, ν&#125;&#123;max&#125; ~ \underset&#123;x&#125;&#123;min&#125; ~ L(x,λ,ν) \\
+$$</span> 观察拉格朗日函数<span
+class="math inline"><em>L</em>(<em>x</em>, <em>λ</em>, <em>ν</em>)</span>，可以看到，对于固定的<span
+class="math inline"><em>x</em><sup>*</sup></span>，有： <span
+class="math display">$$
+L(x^*,λ,ν) = f_0(x^*) + \sum_{i=1}^{m}λ_i f_i(x^*) + \sum_{j=1}^{p}ν_j
+h_j(x^*)
+$$</span> 是关于<span
+class="math inline"><em>λ</em>, <em>ν</em></span>的仿射函数(仿射函数是由变量一阶多项式构成的函数，即形如<span
+class="math inline"><em>f</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em></span>的函数，既是凸函数又是凹函数)。</p>
+<p>令： <span class="math display">$$
+g(λ,ν) = \min_{x} L(x,λ,ν) \\
+$$</span> <span
+class="math inline"><em>g</em>(<em>λ</em>, <em>ν</em>)</span>是关于λ,
+ν的凹函数。</p>
+<p>这里可以用函数的部分应用来理解。对于每一个<span
+class="math inline"><em>x</em><sub><em>i</em></sub></span>，对应一个<span
+class="math inline"><em>g</em><sub><em>i</em></sub>(<em>λ</em>, <em>ν</em>) = <em>L</em>(<em>x</em><sub><em>i</em></sub>, <em>λ</em>, <em>ν</em>)</span>.
+总计l 个（样本数量）仿射函数，取最小值。</p>
+<figure>
+<img src="/image/image-20250504194439190.png" alt="pic" />
+<figcaption aria-hidden="true">pic</figcaption>
+</figure>
+<p>对偶问题： <span class="math display">$$
+\underset{λ, ν}{max} ~ g(λ,ν) = \underset{λ, ν}{max} ~ \underset{x}{min}
+~ L(x,λ,ν) \\
 s.t. ~ λ_i \ge 0
-$$
-由于对偶函数$g(λ,ν)$是凹函数，因此是对偶问题是一个凸优化问题。
-
-设$p^*$是原问题最优解, $d^、*$是对偶问题最优解, 则有:
-
-- 弱对偶性:  $d^* \le ~ p^*$ 
-- 对偶间隙:  $p^* - ~ d^*$
-- 当对偶间隙为0, 即$d^* = ~ p^*$时, 满足强对偶性
-
-强对偶性的充分条件: Slater条件
-
-强对偶性的必要条件: KKT条件
-
-
-
-### 2.2 使用拉格朗日对偶解决SVM基本优化问题
-
-第1节得到的约束极值问题：
-$$
-\underset&#123;w,b&#125;&#123;min&#125; ~ \frac&#123;1&#125;&#123;2&#125;w^Tw \\
-s.t. ~~~ 1 - y^&#123;(i)&#125;G(x_i) =1 - y^&#123;(i)&#125;(w^Tx^&#123;(i)&#125;+b) \le 0 ~~~~~ i=1,2,...,l
-$$
-构造拉格朗日函数：
-$$
-L(w,b,λ) = \frac&#123;1&#125;&#123;2&#125;w^Tw +  \sum_&#123;i=1&#125;^&#123;l&#125; λ_i(1 - y^&#123;(i)&#125;(w^Tx^&#123;(i)&#125;+b)) \\
+$$</span> 由于对偶函数<span
+class="math inline"><em>g</em>(<em>λ</em>, <em>ν</em>)</span>是凹函数，因此是对偶问题是一个凸优化问题。</p>
+<p>设<span
+class="math inline"><em>p</em><sup>*</sup></span>是原问题最优解, <span
+class="math inline"><em>d</em><sup>、</sup>*</span>是对偶问题最优解,
+则有:</p>
+<ul>
+<li>弱对偶性: <span
+class="math inline"><em>d</em><sup>*</sup>≤ <em>p</em><sup>*</sup></span></li>
+<li>对偶间隙: <span
+class="math inline"><em>p</em><sup>*</sup>− <em>d</em><sup>*</sup></span></li>
+<li>当对偶间隙为0, 即<span
+class="math inline"><em>d</em><sup>*</sup>= <em>p</em><sup>*</sup></span>时,
+满足强对偶性</li>
+</ul>
+<p>强对偶性的充分条件: Slater条件</p>
+<p>强对偶性的必要条件: KKT条件</p>
+<h3 id="使用拉格朗日对偶解决svm基本优化问题">2.2
+使用拉格朗日对偶解决SVM基本优化问题</h3>
+<p>第1节得到的约束极值问题： <span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span> 构造拉格朗日函数： <span class="math display">$$
+L(w,b,λ) = \frac{1}{2}w^Tw +  \sum_{i=1}^{l} λ_i(1 -
+y^{(i)}(w^Tx^{(i)}+b)) \\
 s.t. ~ \lambda_i \ge 0
-$$
-使用拉格朗日函数转化为无约束极值问题：
-$$
-\underset&#123;w,b&#125;&#123;min&#125; ~ \underset&#123;λ&#125;&#123;max&#125; ~ L(w,b,λ) = \frac&#123;1&#125;&#123;2&#125;w^Tw +  \sum_&#123;i=1&#125;^&#123;l&#125; λ_i(1 - y^&#123;(i)&#125;(w^Tx^&#123;(i)&#125;+b)) \\
+$$</span> 使用拉格朗日函数转化为无约束极值问题： <span
+class="math display">$$
+\underset{w,b}{min} ~ \underset{λ}{max} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
 s.t. ~ \lambda_i \ge 0
-$$
-对于以上无约束极值问题，我们求解其对偶问题：
-$$
-\underset&#123;λ&#125;&#123;max&#125; ~ \underset&#123;w,b&#125;&#123;min&#125; ~ L(w,b,λ) = \frac&#123;1&#125;&#123;2&#125;w^Tw +  \sum_&#123;i=1&#125;^&#123;l&#125; λ_i(1 - y^&#123;(i)&#125;(w^Tx^&#123;(i)&#125;+b)) \\
+$$</span> 对于以上无约束极值问题，我们求解其对偶问题： <span
+class="math display">$$
+\underset{λ}{max} ~ \underset{w,b}{min} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
 s.t. ~ \lambda_i \ge 0
-$$
-对于$\underset&#123;w,b&#125;&#123;min&#125; ~ L(w,b,λ)$, 令$L$对$w,b$偏导数等于$0$：
-$$
-\frac&#123;\partial L(w,b,λ)&#125;&#123;\partial w&#125; = w - \sum_&#123;i=1&#125;^&#123;l&#125; λ_iy^&#123;(i)&#125;x^&#123;(i)&#125; = 0
-$$
-$$
-\frac&#123;\partial L(w,b,λ)&#125;&#123;\partial b&#125; = \sum_&#123;i=1&#125;^&#123;l&#125; λ_iy^&#123;(i)&#125; = 0
-$$
-
-
-
-推得:  
-$$
-w = \sum_&#123;i=1&#125;^&#123;l&#125; λ_iy^&#123;(i)&#125;x^&#123;(i)&#125; \qquad (1)
-$$
-$$
-\sum_&#123;i=1&#125;^&#123;l&#125; λ_iy^&#123;(i)&#125; = 0 \qquad \quad(2)
-$$
-
-
-
-将(1)带入上述对偶问题, 得到如下二次优化问题:
-$$
-\underset&#123;λ&#125;&#123;max&#125; ~ \sum_&#123;i=1&#125;^&#123;l&#125; λ_i - \frac&#123;1&#125;&#123;2&#125;\sum_&#123;i=1&#125;^&#123;l&#125;\sum_&#123;j=1&#125;^&#123;l&#125; λ_i λ_j y^&#123;(i)&#125; y^&#123;(j)&#125; (x^&#123;(i)&#125; \cdot x^&#123;(j)&#125;) \\
+$$</span> 对于<span class="math inline">$\underset{w,b}{min} ~
+L(w,b,λ)$</span>, 令<span class="math inline"><em>L</em></span>对<span
+class="math inline"><em>w</em>, <em>b</em></span>偏导数等于<span
+class="math inline">0</span>： <span class="math display">$$
+\frac{\partial L(w,b,λ)}{\partial w} = w - \sum_{i=1}^{l}
+λ_iy^{(i)}x^{(i)} = 0
+$$</span> <span class="math display">$$
+\frac{\partial L(w,b,λ)}{\partial b} = \sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p>
+<p>推得:<br />
+<span class="math display">$$
+w = \sum_{i=1}^{l} λ_iy^{(i)}x^{(i)} \qquad (1)
+$$</span> <span class="math display">$$
+\sum_{i=1}^{l} λ_iy^{(i)} = 0 \qquad \quad(2)
+$$</span></p>
+<p>将(1)带入上述对偶问题, 得到如下二次优化问题: <span
+class="math display">$$
+\underset{λ}{max} ~ \sum_{i=1}^{l} λ_i -
+\frac{1}{2}\sum_{i=1}^{l}\sum_{j=1}^{l} λ_i λ_j y^{(i)} y^{(j)} (x^{(i)}
+\cdot x^{(j)}) \\
 s.t. ~~~~~ \lambda_i \ge 0 ~~~~~~~~~\\
-~~~~~~~~~~~~~\sum_&#123;i=1&#125;^&#123;l&#125; λ_iy^&#123;(i)&#125; = 0
-$$
-
-## 3. SMO算法
-
-对于对偶问题得到的二次优化问题，使用SMO算法求解。
-
-
-
-
-
-
-
-### 参考文献
-
-[【机器学习】支持向量机 SVM（非常详细）](https://zhuanlan.zhihu.com/p/77750026)
-
-[【凸优化笔记6】-拉格朗日对偶（Lagrange duality）、KKT条件](https://zhuanlan.zhihu.com/p/103961917)
-
-[【线性分类器】（四）万字长文解释拉格朗日乘子与支持向量机](https://blog.csdn.net/weixin_44378835/article/details/110732412?utm_source=app)
-</code></pre>
+~~~~~~~~~~~~~\sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p>
+<h2 id="smo算法">3. SMO算法</h2>
+<p>对于对偶问题得到的二次优化问题，使用SMO算法求解。</p>
+<h3 id="参考文献">参考文献</h3>
+<p><a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77750026">【机器学习】支持向量机
+SVM（非常详细）</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/103961917">【凸优化笔记6】-拉格朗日对偶（Lagrange
+duality）、KKT条件</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44378835/article/details/110732412?utm_source=app">【线性分类器】（四）万字长文解释拉格朗日乘子与支持向量机</a></p>
 
         </div>
 
@@ -505,7 +512,7 @@ $$
         <section class="post-nav">
             
             
-            <a class="next" rel="next" href="/2025/03/19/hello-world/">Hello World</a>
+            <a class="next" rel="next" href="/2025/03/19/Test2/">Test2</a>
             
         </section>
 
