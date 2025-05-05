@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Xie yx">
+
+
+
+
+
+<title>支撑向量机（SVM） | Hexo</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xieyx&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xieyx&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">支撑向量机（SVM）</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Xie yx</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">May 5, 2025&nbsp;&nbsp;17:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/Machine-Learning/">Machine Learning</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>​</p>
+<h2 id="完整流程">0. 完整流程</h2>
+<p>该部分希望以全局的视角，简要而完整的展示（硬间隔）SVM算法的整体流程，以便于读者对该算法形成一个完整的视图。对于各部分的细节推导在后续对应模块中。</p>
+<ol type="1">
+<li><p>根据SVM目标：找到一个分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>，能够正确分离所有样本（约束条件），同时使得分类间隔最大化（优化目标），得到基本优化问题：
+<span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span></p></li>
+<li><p>拉格朗日对偶问题</p>
+<p>对于1.得到的约束极值问题，使用拉格朗日函数转化为无约束极值问题：
+<span class="math display">$$
+\underset{w,b}{min} ~ \underset{λ}{max} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于以上无约束极值问题，我们求解其对偶问题： <span
+class="math display">$$
+\underset{λ}{max} ~ \underset{w,b}{min} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于<span class="math inline">$\underset{w,b}{min} ~
+L(w,b,λ)$</span>, 令<span class="math inline"><em>L</em></span>对<span
+class="math inline"><em>w</em>, <em>b</em></span>偏导数等于<span
+class="math inline">0</span>, 得到如下二次优化问题:</p>
+<p><span class="math display">$$
+\underset{λ}{\max}~\sum_{i=1}^{l} λ_i -
+\frac{1}{2}\sum_{i=1}^{l}\sum_{j=1}^{l} λ_i λ_j y^{(i)} y^{(j)} (x^{(i)}
+\cdot x^{(j)}) \\
+\text{s.t.} \quad \lambda_i \ge 0 \\
+\qquad \qquad \sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p></li>
+<li><p>SMO算法求解</p>
+<p>使用SMO算法求解以上二次优化问题,得到<span
+class="math inline"><em>λ</em><sub><em>i</em></sub></span></p>
+<p>根据对偶问题的互补松弛性 <span
+class="math display"><em>λ</em><sub><em>i</em></sub>(1 − <em>y</em><sup>(<em>i</em>)</sup>(<em>w</em><sup><em>T</em></sup><em>x</em><sup>(<em>i</em>)</sup> + <em>b</em>)) = 0</span>
+根据等式(1)可以计算得到<span class="math inline"><em>w</em></span>.</p>
+<p>对于<span
+class="math inline"><em>λ</em><sub><em>i</em></sub> ≠ 0</span>的样本,
+有<span
+class="math inline">(1 − <em>y</em><sup>(<em>i</em>)</sup>(<em>w</em><sup><em>T</em></sup><em>x</em><sup>(<em>i</em>)</sup> + <em>b</em>)) = 0</span>,
+即对应样本为支持向量.</p>
+<p>带入一个支撑向量样本,即可得到b（减少误差可以带入所有支撑向量计算平均b）。</p>
+<p>至此，分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>W</em><sup><em>T</em></sup><em>x</em> + <em>b</em> = 0</span>已求出</p></li>
+</ol>
+<h2 id="svm初始优化问题">1. SVM初始优化问题</h2>
+<p>SVM目标：找到一个分类超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>使得支撑向量<span
+class="math inline"><em>x</em><sub><em>s</em></sub></span>到决策边界的距离<span
+class="math inline">$r_i=\frac{|G(x_s)|}{||w||}$</span>最大化，即最大化分类间距d=2r，得到初始优化问题：
+<span class="math display">$$
+\underset{w,b}{max} ~ d=2\frac{|G(x_s)|}{||w||} \\
+$$</span></p>
+<p>由于超平面<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>可以等比例放缩w,
+b而不改变超平面本身，即<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em> = 0</span>等价于<span
+class="math inline"><em>G</em>(<em>x</em>) = <em>k</em><em>w</em><em>x</em> + <em>k</em><em>b</em> = 0</span>，因此对于上述问题，可以通过固定分母<span
+class="math inline">||<em>w</em>||</span>最大化分子<span
+class="math inline">|<em>G</em>(<em>x</em><sub><em>s</em></sub>)|</span>，也可以固定分子<span
+class="math inline">|<em>G</em>(<em>x</em><sub><em>s</em></sub>)|</span>最小化分母<span
+class="math inline">||<em>w</em>||</span>。这里选择后者，令： <span
+class="math display">$$
+|G(x_s)|=1 \\
+$$</span> 由于<span
+class="math inline"><em>x</em><sub><em>s</em></sub></span>为支撑向量，因此对于任意样本<span
+class="math inline"><em>x</em><sup>(<em>i</em>)</sup></span>，有 <span
+class="math display">$$
+|G(x^{(i)})|\ge1 \\
+$$</span> 为去除绝对值，分为以下两种情况讨论： <span
+class="math display">$$
+\left\{
+\begin{matrix}
+G(x^{(i)}) \ge 1 &amp;&amp; y^{(i)}=1\\
+G(x^{(i)}) \le -1 &amp;&amp; y^{(i)}=-1\\
+\end{matrix}
+\right .
+$$</span> （对于二分类问题，对于正样本记<span
+class="math inline"><em>y</em><sup>(<em>i</em>)</sup> = 1</span>，负样本记<span
+class="math inline"><em>y</em><sup>(<em>i</em>)</sup> = −1</span>）</p>
+<p>等价于： <span class="math display">$$
+y^{(i)}G(x_i) = y^{(i)}(w^Tx^{(i)}+b) \ge 1 ~~~~~ i=1,2,...,l \\
+$$</span> 即： <span class="math display">$$
+1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 \qquad i=1,2,...,l \\
+$$</span></p>
+<p>此时优化目标转化为<span
+class="math inline"><em>m</em><em>i</em><em>n</em> ||<em>w</em>||</span>，为便于后续推导，变换为优化$min
+~ ||w||^2 = w^Tw $</p>
+<p>完整优化问题变为一个约束极值问题： <span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span> （以上问题即为0.1节中的基本优化问题）</p>
+<h2 id="拉格朗日对偶问题">2. 拉格朗日对偶问题</h2>
+<h3 id="拉格朗日对偶">2.1 拉格朗日对偶</h3>
+<p>原始约束极值问题： <span class="math display">$$
+\underset{x}{min} ~ f_0(x) \\
+s.t. ~ f_i(x) \le 0, ~ i=1,2,...,m \\
+~~~~~~~ h_j(x) = 0 ,~  j = 1,2,...,p
+$$</span> 其拉格朗日函数定义为: <span class="math display">$$
+L(x,λ,ν) = f_0(x) + \sum_{i=1}^{m}λ_i f_i(x) + \sum_{j=1}^{p}ν_j h_j(x)
+~~~~~~ λ_i \ge 0
+$$</span> 由于$λ_i , ~f_i(x) ,~ h_j(x) = 0 $,所以 <span
+class="math inline">$L(x,λ,ν) = f_0(x) + \sum_{i=1}^{m}λ_i f_i(x) \le
+f_0(x)$</span></p>
+<p>原始问题等价于: <span class="math display">$$
+\underset{x}{min} ~ \underset{λ, ν}{max} ~ L(x,λ,ν) \\
+s.t. ~ λ_i \ge 0
+$$</span> 观察拉格朗日函数<span
+class="math inline"><em>L</em>(<em>x</em>, <em>λ</em>, <em>ν</em>)</span>，可以看到，对于固定的<span
+class="math inline"><em>x</em><sup>*</sup></span>，有： <span
+class="math display">$$
+L(x^*,λ,ν) = f_0(x^*) + \sum_{i=1}^{m}λ_i f_i(x^*) + \sum_{j=1}^{p}ν_j
+h_j(x^*)
+$$</span> 是关于<span
+class="math inline"><em>λ</em>, <em>ν</em></span>的仿射函数(仿射函数是由变量一阶多项式构成的函数，即形如<span
+class="math inline"><em>f</em>(<em>x</em>) = <em>w</em><em>x</em> + <em>b</em></span>的函数，既是凸函数又是凹函数)。</p>
+<p>令： <span class="math display">$$
+g(λ,ν) = \min_{x} L(x,λ,ν) \\
+$$</span> <span
+class="math inline"><em>g</em>(<em>λ</em>, <em>ν</em>)</span>是关于λ,
+ν的凹函数。</p>
+<p>这里可以用函数的部分应用来理解。对于每一个<span
+class="math inline"><em>x</em><sub><em>i</em></sub></span>，对应一个<span
+class="math inline"><em>g</em><sub><em>i</em></sub>(<em>λ</em>, <em>ν</em>) = <em>L</em>(<em>x</em><sub><em>i</em></sub>, <em>λ</em>, <em>ν</em>)</span>.
+总计l 个（样本数量）仿射函数，取最小值。</p>
+<figure>
+<img src="D:\blog\myblog\source\image\image-20250504194439190.png"
+alt="image-20250504194439190" />
+<figcaption aria-hidden="true">image-20250504194439190</figcaption>
+</figure>
+<p>对偶问题： <span class="math display">$$
+\underset{λ, ν}{max} ~ g(λ,ν) = \underset{λ, ν}{max} ~ \underset{x}{min}
+~ L(x,λ,ν) \\
+s.t. ~ λ_i \ge 0
+$$</span> 由于对偶函数<span
+class="math inline"><em>g</em>(<em>λ</em>, <em>ν</em>)</span>是凹函数，因此是对偶问题是一个凸优化问题。</p>
+<p>设<span
+class="math inline"><em>p</em><sup>*</sup></span>是原问题最优解, <span
+class="math inline"><em>d</em><sup>、</sup>*</span>是对偶问题最优解,
+则有:</p>
+<ul>
+<li>弱对偶性: <span
+class="math inline"><em>d</em><sup>*</sup>≤ <em>p</em><sup>*</sup></span></li>
+<li>对偶间隙: <span
+class="math inline"><em>p</em><sup>*</sup>− <em>d</em><sup>*</sup></span></li>
+<li>当对偶间隙为0, 即<span
+class="math inline"><em>d</em><sup>*</sup>= <em>p</em><sup>*</sup></span>时,
+满足强对偶性</li>
+</ul>
+<p>强对偶性的充分条件: Slater条件</p>
+<p>强对偶性的必要条件: KKT条件</p>
+<h3 id="使用拉格朗日对偶解决svm基本优化问题">2.2
+使用拉格朗日对偶解决SVM基本优化问题</h3>
+<p>第1节得到的约束极值问题： <span class="math display">$$
+\underset{w,b}{min} ~ \frac{1}{2}w^Tw \\
+s.t. ~~~ 1 - y^{(i)}G(x_i) =1 - y^{(i)}(w^Tx^{(i)}+b) \le 0 ~~~~~
+i=1,2,...,l
+$$</span> 构造拉格朗日函数： <span class="math display">$$
+L(w,b,λ) = \frac{1}{2}w^Tw +  \sum_{i=1}^{l} λ_i(1 -
+y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 使用拉格朗日函数转化为无约束极值问题： <span
+class="math display">$$
+\underset{w,b}{min} ~ \underset{λ}{max} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于以上无约束极值问题，我们求解其对偶问题： <span
+class="math display">$$
+\underset{λ}{max} ~ \underset{w,b}{min} ~ L(w,b,λ) = \frac{1}{2}w^Tw
++  \sum_{i=1}^{l} λ_i(1 - y^{(i)}(w^Tx^{(i)}+b)) \\
+s.t. ~ \lambda_i \ge 0
+$$</span> 对于<span class="math inline">$\underset{w,b}{min} ~
+L(w,b,λ)$</span>, 令<span class="math inline"><em>L</em></span>对<span
+class="math inline"><em>w</em>, <em>b</em></span>偏导数等于<span
+class="math inline">0</span>： <span class="math display">$$
+\frac{\partial L(w,b,λ)}{\partial w} = w - \sum_{i=1}^{l}
+λ_iy^{(i)}x^{(i)} = 0
+$$</span> <span class="math display">$$
+\frac{\partial L(w,b,λ)}{\partial b} = \sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p>
+<p>推得:<br />
+<span class="math display">$$
+w = \sum_{i=1}^{l} λ_iy^{(i)}x^{(i)} \qquad (1)
+$$</span> <span class="math display">$$
+\sum_{i=1}^{l} λ_iy^{(i)} = 0 \qquad \quad(2)
+$$</span></p>
+<p>将(1)带入上述对偶问题, 得到如下二次优化问题: <span
+class="math display">$$
+\underset{λ}{max} ~ \sum_{i=1}^{l} λ_i -
+\frac{1}{2}\sum_{i=1}^{l}\sum_{j=1}^{l} λ_i λ_j y^{(i)} y^{(j)} (x^{(i)}
+\cdot x^{(j)}) \\
+s.t. ~~~~~ \lambda_i \ge 0 ~~~~~~~~~\\
+~~~~~~~~~~~~~\sum_{i=1}^{l} λ_iy^{(i)} = 0
+$$</span></p>
+<h2 id="smo算法">3. SMO算法</h2>
+<p>对于对偶问题得到的二次优化问题，使用SMO算法求解。</p>
+<h3 id="参考文献">参考文献</h3>
+<p><a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77750026">【机器学习】支持向量机
+SVM（非常详细）</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/103961917">【凸优化笔记6】-拉格朗日对偶（Lagrange
+duality）、KKT条件</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44378835/article/details/110732412?utm_source=app">【线性分类器】（四）万字长文解释拉格朗日乘子与支持向量机</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Xie yx</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://example.com/2025/05/05/SVM/">http://example.com/2025/05/05/SVM/</a></span>
+                    </p>
+                
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/SVM/"># SVM</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2025/03/19/hello-world/">Hello World</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Xie yx | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
